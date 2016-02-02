@@ -12,11 +12,20 @@ ebtables command has three tables(filter, nat, broute).
 
 In my case, output interface is tap device.
 
+	* how to make tap device by "openvpn" command.
+
+``` openvpn –mktun –dev tap –user (username) ```
+
+	* how to be active tap device by "ip" command.
+
+``` ip link set tap up ```
+
+
 * -i, --in-interface (interface name)
 
 
 
-### ulog? 
+### what is ulog? 
 
 * --ulog
 
@@ -28,7 +37,7 @@ In my case, output interface is tap device.
 
 [http://ebtables.netfilter.org/examples/basic.html#ex_ulog](refarence document2)
 
-## netlink
+## what is netlink?
 
 * nl_group is a bit mask with every bit representing a netlink group number.
 
