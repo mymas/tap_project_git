@@ -1,7 +1,20 @@
-# ebtable 
+# ebtables 
+
+# ebtables commmand
+
+* -t, --table
+
+ebtables command has three tables(filter, nat, broute).
+
+	* broute: "broute" is a interface which has function, bridge and router.
+
+* -o, --out-interface (interface name)
+
+In my case, output interface is tap device.
+
+* -i, --in-interface (interface name)
 
 
-## ebtables
 
 ### ulog? 
 
@@ -12,6 +25,7 @@
 * --ulog-nlgroup group
 
 [https://linuxjm.osdn.jp/html/LDP_man-pages/man7/netlink.7.html](refarence document1)
+
 [http://ebtables.netfilter.org/examples/basic.html#ex_ulog](refarence document2)
 
 ## netlink
