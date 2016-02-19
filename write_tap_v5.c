@@ -27,23 +27,23 @@
  */
 
 
-#include <asm/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <time.h>
-#include <linux/netlink.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <errno.h>
-#include <netinet/if_ether.h>
-#include <netinet/ether.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include "ebtables_u.h"
-#include "ethernetdb.h"
-#include <linux/netfilter_bridge/ebt_ulog.h>
+//#include <asm/types.h>
+//#include <sys/socket.h>
+//#include <sys/time.h>
+//#include <time.h>
+//#include <linux/netlink.h>
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <netdb.h>
+//#include <errno.h>
+//#include <netinet/if_ether.h>
+//#include <netinet/ether.h>
+//#include <netinet/ip.h>
+//#include <netinet/ip_icmp.h>
+//#include "ebtables/include/ebtables_u.h"
+//#include "ebtables/include/ethernetdb.h"
+//#include <linux/netfilter_bridge/ebt_ulog.h>
 
 
 //mym 
@@ -181,11 +181,16 @@ int main(int argc, char **argv)
 	struct tm* ptm;
 	char time_str[40], *ctmp;
 
+#ifdef tap_test
 	//tap
-	int tap_fd, option;
+	int tap_fd;
 	int flags = IFF_TAP;
-	char if_name[IFNAMSIZ] = "";
+	char if_name[IFNAMSIZ] = "tap0";
 	const struct ip *ip_addr;	
+	//char guestMN_mac[]= "0:16:3e:d:58:c1";
+	char guest_mac[]= "0:16:3e:d:58:0";
+	char interface_dev[] ="vif2.0-emu";
+#endif
 
 	if (argc == 2) {
 		i = strtoul(argv[1], &ctmp, 10);
@@ -201,7 +206,7 @@ int main(int argc, char **argv)
 
 #ifdef tap_test
 	/* initialize tun/tap interface */
-	strncpy(if_name, argv[2], IFNAMSIZ-1);
+	//strncpy(if_name, argv[2], IFNAMSIZ-1);
 	if ( (tap_fd = tun_alloc(if_name, flags | IFF_NO_PI)) < 0 ) {
 		printf("error:tun_alloc\n");
 		exit(1);
@@ -265,8 +270,19 @@ int main(int argc, char **argv)
 
 
 #ifdef tap_test
-	ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
-	write(tap_fd, msg->data, ip_addr->ip_len);
+		if(strcmp(msg->physoutdev, interface_dev) == 0 && 
+				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_dest), guest_mac) ==0 ){
+
+			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
+			write(tap_fd, msg->data, ip_addr->ip_len);
+		}
+
+		if(strcmp(msg->physindev, interface_dev) ==0 && 
+				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_source), guest_mac) == 0 ){
+
+			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
+			write(tap_fd, msg->data, ip_addr->ip_len);
+		}
 #endif
 
 		if (!etype)
