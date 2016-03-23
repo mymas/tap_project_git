@@ -1,4 +1,3 @@
-
 /*
  * Simple example program to log packets received with the ulog
  * watcher of ebtables.
@@ -48,12 +47,194 @@
 
 //mym 
 #include "write_to_tap.h"
+//#include "mac_list.h"
 
+struct mac_list *list_top;
+struct mac_list p;
+
+char cmd_str[256];
+
+int flags = IFF_TAP;
 #define tap_test
+//#define PRINTF
+//#define tap_test
 #define SIZE_ETHERNET 14
 /* <linux/if_vlan.h> doesn't hand this to userspace :-( */
 #define VLAN_HLEN 4
 
+int mac_list_count(void);
+int tun_alloc(char *dev, int flags);
+struct mac_list * mac_list_check(char item[18]);
+void mac_list_print(void);
+
+
+struct mac_list{
+
+	char mac_add[18];
+	char tap_name[10];
+	int tap_fd_num;
+
+	struct mac_list *mac_list_next;
+};
+
+//init
+void mac_list_init(){
+
+	while(list_top != NULL){
+		struct mac_list *delete_pos = list_top;
+		list_top = list_top->mac_list_next;
+		free(delete_pos);
+	}
+
+}
+
+//next
+struct mac_list * mac_list_next(struct mac_list * pos){
+
+	if(pos != NULL){
+
+		return pos->mac_list_next;
+	}else{
+
+		return MAC_LIST_TAIL;
+	}
+}
+
+
+
+//top
+
+struct mac_list * mac_list_top(void){
+
+	return list_top;
+
+}
+
+//add
+void mac_list_add(char item[18]){
+
+
+	//sprintf(cmd_str, "ip link set tap%d up", mac_list_count()-1);
+	//
+	//system("openvpn --mktun --dev tap --user shohei");
+	//system(cmd_str);
+
+
+	char tap_name[5];
+	sprintf(tap_name, "tap%d", mac_list_count());
+
+	if(list_top == MAC_LIST_TAIL){
+
+		list_top = (struct mac_list *)malloc(sizeof(struct mac_list));
+		strcpy(list_top->mac_add, item);
+		strcpy(list_top->tap_name, tap_name);
+
+		if ( (list_top->tap_fd_num = tun_alloc(tap_name, flags | IFF_NO_PI)) < 0 ) {
+			printf("error:tun_alloc\n");
+			exit(1);
+		}
+
+
+		//printf("new item %s \n", list_top->mac_add);
+		list_top->mac_list_next = MAC_LIST_TAIL;
+
+	}else{
+		struct mac_list *p_temp = list_top;
+		while(p_temp->mac_list_next != MAC_LIST_TAIL){
+
+			if( strcmp(p_temp->mac_add, item) == 0){
+				//printf("already have the item %s \n", item);
+				return;
+			}
+
+			p_temp = mac_list_next(p_temp);
+		}
+
+
+		if(strcmp(p_temp->mac_add, item) == 0 ){
+			return;
+		}
+
+
+
+
+
+		p_temp->mac_list_next = (struct mac_list *)malloc(sizeof(struct mac_list));
+		strcpy(p_temp->mac_list_next->mac_add, item);
+		strcpy(p_temp->mac_list_next->tap_name, tap_name);
+
+		if ( (p_temp->mac_list_next->tap_fd_num = tun_alloc(tap_name, flags | IFF_NO_PI)) < 0 ) {
+			printf("error:tun_alloc\n");
+			exit(1);
+		}
+
+		p_temp->mac_list_next->mac_list_next = MAC_LIST_TAIL;
+
+	}
+
+	//ret:
+	mac_list_print();
+
+}
+
+
+int mac_list_count(void){
+
+	int cnt=0;
+	struct mac_list *p;
+
+	p = list_top;
+	while(p != MAC_LIST_TAIL){
+		cnt++;
+		p = p->mac_list_next;
+	}
+
+	return cnt;
+
+}
+
+
+void mac_list_print(void){
+
+	struct mac_list *p;
+
+	p = list_top;
+
+	while(p != MAC_LIST_TAIL){
+		printf("mac add | %s --> %s | fd num %d\n", p->mac_add, p->tap_name, p->tap_fd_num);
+		p = p->mac_list_next;
+	}
+
+	printf("------------------------\n");
+	return ;
+
+}
+
+
+struct mac_list * mac_list_check(char item[18]){
+
+
+	if(list_top == MAC_LIST_TAIL){
+
+		return list_top;
+
+	}else{
+		struct mac_list *p;
+		p = list_top;
+
+		while(p!= MAC_LIST_TAIL){
+
+			if( strcmp(p->mac_add, item) == 0){
+				return p;
+			}
+			
+			p = mac_list_next(p);
+		}
+
+		return NULL;
+	}
+
+}
 
 int tun_alloc(char *dev, int flags){
 
@@ -103,15 +284,19 @@ static struct sockaddr_nl sa_kernel =
 	.nl_groups = 1,
 };
 
+
+#ifdef PRINTF
 static const char *hookstr[NF_BR_NUMHOOKS] =
 {
-        [NF_BR_POST_ROUTING] "POSTROUTING",
-         [NF_BR_PRE_ROUTING] "PREROUTING",
-           [NF_BR_LOCAL_OUT] "OUTPUT",
-            [NF_BR_LOCAL_IN] "INPUT",
-            [NF_BR_BROUTING] "BROUTING",
-             [NF_BR_FORWARD] "FORWARD"
+	[NF_BR_POST_ROUTING] "POSTROUTING",
+	[NF_BR_PRE_ROUTING] "PREROUTING",
+	[NF_BR_LOCAL_OUT] "OUTPUT",
+	[NF_BR_LOCAL_IN] "INPUT",
+	[NF_BR_BROUTING] "BROUTING",
+	[NF_BR_FORWARD] "FORWARD"
 };
+
+#endif
 
 #define DEBUG_QUEUE 0
 #define BUFLEN 65536
@@ -130,13 +315,18 @@ ebt_ulog_packet_msg_t *ulog_get_packet()
 	if (!nlh) {
 recv_new:
 		if (pkts_per_msg && DEBUG_QUEUE)
+#ifdef PRINTF
 			printf("PACKETS IN LAST MSG: %d\n", pkts_per_msg);
+#endif
+
 		pkts_per_msg = 0;
 		len = recvfrom(sfd, buf, BUFLEN, 0,
-		               (struct sockaddr *)&sa_kernel, &addrlen);
+				(struct sockaddr *)&sa_kernel, &addrlen);
 		if (addrlen != sizeof(sa_kernel)) {
+#ifdef PRINTF
 			printf("addrlen %u != %u\n", addrlen,
-			       (uint32_t)sizeof(sa_kernel));
+					(uint32_t)sizeof(sa_kernel));
+#endif
 			exit(-1);
 		}
 		if (len == -1) {
@@ -147,8 +337,10 @@ recv_new:
 		}
 		nlh = (struct nlmsghdr *)buf;
 		if (nlh->nlmsg_flags & MSG_TRUNC || len > BUFLEN) {
+#ifdef PRINTF
 			printf("Packet truncated");
 			exit(-1);
+#endif
 		}
 		if (!NLMSG_OK(nlh, BUFLEN)) {
 			perror("Netlink message parse error\n");
@@ -168,36 +360,47 @@ recv_new:
 	return msg;
 }
 
-int main(int argc, char **argv)
-{
-	int i, curr_len, pktcnt = 0;
+int main(int argc, char **argv){
+
+	int i;
+	//int curr_len;
+
+#ifdef PRINTF
+	int pktcnt = 0;
+#endif
+
 	int rcvbufsize = BUFLEN;
 	ebt_ulog_packet_msg_t *msg;
 	struct ethhdr *ehdr;
-	struct ethertypeent *etype;
-	struct protoent *prototype;
-	struct iphdr *iph;
-	struct icmphdr *icmph;
+	//struct ethertypeent *etype;
+
+	//struct protoent *prototype;
+	//struct iphdr *iph;
 	struct tm* ptm;
 	char time_str[40], *ctmp;
 
 #ifdef tap_test
 	//tap
-	int tap_fd;
-	int flags = IFF_TAP;
-	char if_name[IFNAMSIZ] = "tap0";
+	//int tap_fd;
+	//int flags = IFF_TAP;
+	//char if_name[IFNAMSIZ] = "tap0";
 	const struct ip *ip_addr;	
-	//char guestMN_mac[]= "0:16:3e:d:58:c1";
-	char guest_mac[]= "0:16:3e:d:58:0";
 	char interface_dev[] ="vif2.0-emu";
+	struct mac_list *temp_mac_pointer =NULL;
+
+	//	struct mac_list p;
+	mac_list_init();
+
 #endif
 
 	if (argc == 2) {
 		i = strtoul(argv[1], &ctmp, 10);
 		if (*ctmp != '\0' || i < 1 || i > 32) {
+#ifdef PRINTF
 			printf("Usage: %s <group number>\nWith  0 < group "
-			       "number < 33\n", argv[0]);
+					"number < 33\n", argv[0]);
 			exit(0);
+#endif
 		}
 		sa_local.nl_groups = sa_kernel.nl_groups = 1 << (i - 1);
 	}
@@ -207,10 +410,10 @@ int main(int argc, char **argv)
 #ifdef tap_test
 	/* initialize tun/tap interface */
 	//strncpy(if_name, argv[2], IFNAMSIZ-1);
-	if ( (tap_fd = tun_alloc(if_name, flags | IFF_NO_PI)) < 0 ) {
-		printf("error:tun_alloc\n");
-		exit(1);
-	}
+	//	if ( (tap_fd = tun_alloc(if_name, flags | IFF_NO_PI)) < 0 ) {
+	//		printf("error:tun_alloc\n");
+	//		exit(1);
+	//	}
 #endif 
 
 
@@ -223,13 +426,13 @@ int main(int argc, char **argv)
 	}
 
 	if (bind(sfd, (struct sockaddr *)(&sa_local), sizeof(sa_local)) ==
-	    -1) {
+			-1) {
 		perror("bind");
 		exit(-1);
 	}
 
 	i = setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &rcvbufsize,
-	               sizeof(rcvbufsize));
+			sizeof(rcvbufsize));
 
 	while (1) {
 		if (!(msg = ulog_get_packet()))
@@ -237,137 +440,132 @@ int main(int argc, char **argv)
 
 		if (msg->version != EBT_ULOG_VERSION) {
 			printf("WRONG VERSION: %d INSTEAD OF %d\n",
-			       msg->version, EBT_ULOG_VERSION);
+					msg->version, EBT_ULOG_VERSION);
 			continue;
 		}
+#ifdef PRINTF
 		printf("PACKET NR: %d\n", ++pktcnt);
-		iph = NULL;
-		curr_len = ETH_HLEN;
+#endif
+		//iph = NULL;
+		//curr_len = ETH_HLEN;
 
+#ifdef PRINTF
 		printf("INDEV=%s\nOUTDEV=%s\nPHYSINDEV=%s\nPHYSOUTDEV=%s\n"
-		       "PREFIX='%s'", msg->indev, msg->outdev, msg->physindev,
-		       msg->physoutdev, msg->prefix);
+				"PREFIX='%s'", msg->indev, msg->outdev, msg->physindev,
+				msg->physoutdev, msg->prefix);
+#endif
 
 		ptm = localtime(&msg->stamp.tv_sec);
 		strftime (time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", ptm);
+
+#ifdef PRINTF
 		printf("\nARRIVAL TIME: %s\nMARK=%lu\nHOOK=%s\n", time_str,
-		       msg->mark, hookstr[msg->hook]);
+				msg->mark, hookstr[msg->hook]);
 
-		if (msg->data_len < curr_len) {
-			printf("====>Packet smaller than Ethernet header "
-			       "length<====\n");
-			goto letscontinue;
-		}
+#endif
 
-		printf("::::::::ETHERNET:HEADER::::::::\n");
+
+		//	printf("::::::::ETHERNET:HEADER::::::::\n");
 
 		ehdr = (struct ethhdr *)msg->data;
-		printf("MAC SRC=%s\n", ether_ntoa((const struct ether_addr *)
-		       ehdr->h_source));
-		printf("MAC DST=%s\nETHERNET PROTOCOL=", ether_ntoa(
-		       (const struct ether_addr *)ehdr->h_dest));
-		etype = getethertypebynumber(ntohs(ehdr->h_proto));
+
+		//		printf("MAC SRC=%s\n", ether_ntoa((const struct ether_addr *)
+		//					ehdr->h_source));
+
+		//	printf("MAC DST=%s\nETHERNET PROTOCOL=", ether_ntoa(
+		//				(const struct ether_addr *)ehdr->h_dest));
+		//
+//		etype = getethertypebynumber(ntohs(ehdr->h_proto));
 
 
 #ifdef tap_test
-		if(strcmp(msg->physoutdev, interface_dev) == 0 && 
-				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_dest), guest_mac) ==0 ){
+
+
+		if(strcmp(msg->physoutdev, interface_dev) == 0 ){
+			mac_list_add(ether_ntoa((const struct ether_addr *)ehdr->h_dest));
+			temp_mac_pointer =  mac_list_check(ether_ntoa((const struct ether_addr *)ehdr->h_dest));
 
 			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
-			write(tap_fd, msg->data, ip_addr->ip_len);
+			write(temp_mac_pointer->tap_fd_num , msg->data, ip_addr->ip_len);
 		}
 
-		if(strcmp(msg->physindev, interface_dev) ==0 && 
-				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_source), guest_mac) == 0 ){
+		if(strcmp(msg->physindev, interface_dev) == 0 ){
+			mac_list_add(ether_ntoa((const struct ether_addr *)ehdr->h_source));
+			temp_mac_pointer =  mac_list_check(ether_ntoa((const struct ether_addr *)ehdr->h_source));
 
 			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
-			write(tap_fd, msg->data, ip_addr->ip_len);
+			write(temp_mac_pointer->tap_fd_num , msg->data, ip_addr->ip_len);
+
 		}
 #endif
 
+#ifdef etype_print
+if (!etype)
+
+	printf("0x%x\n", ntohs(ehdr->h_proto));
+	else
+	printf("%s\n", etype->e_name);
+
+	if (ehdr->h_proto == htons(ETH_P_8021Q)) {
+		struct vlan_hdr *vlanh = (struct vlan_hdr *)
+			(((char *)ehdr) + curr_len);
+
+		printf("::::::::::VLAN:HEADER::::::::::\n");
+		curr_len += VLAN_HLEN;
+
+		printf("VLAN TCI=%d\n", ntohs(vlanh->TCI));
+		printf("VLAN ENCAPS PROTOCOL=");
+		etype = getethertypebynumber(ntohs(vlanh->encap));
 		if (!etype)
-			printf("0x%x\n", ntohs(ehdr->h_proto));
+
+			printf("0x%x\n", ntohs(vlanh->encap));
+
 		else
 			printf("%s\n", etype->e_name);
+		if (ehdr->h_proto == htons(ETH_P_IP))
+			iph = (struct iphdr *)(vlanh + 1);
+	} else if (ehdr->h_proto == htons(ETH_P_IP))
 
-		if (ehdr->h_proto == htons(ETH_P_8021Q)) {
-			struct vlan_hdr *vlanh = (struct vlan_hdr *)
-			                          (((char *)ehdr) + curr_len);
-			printf("::::::::::VLAN:HEADER::::::::::\n");
-			curr_len += VLAN_HLEN;
-			if (msg->data_len < curr_len) {
-				printf("====>Packet only contains partial "
-				       "VLAN header<====\n");
-				goto letscontinue;
-			}
 
-			printf("VLAN TCI=%d\n", ntohs(vlanh->TCI));
-			printf("VLAN ENCAPS PROTOCOL=");
-			etype = getethertypebynumber(ntohs(vlanh->encap));
-			if (!etype)
-				printf("0x%x\n", ntohs(vlanh->encap));
-			else
-				printf("%s\n", etype->e_name);
-			if (ehdr->h_proto == htons(ETH_P_IP))
-				iph = (struct iphdr *)(vlanh + 1);
-		} else if (ehdr->h_proto == htons(ETH_P_IP))
-			iph = (struct iphdr *)(((char *)ehdr) + curr_len);
-		if (!iph)
-			goto letscontinue;
+iph = (struct iphdr *)(((char *)ehdr) + curr_len);
 
-		curr_len += sizeof(struct iphdr);
-		if (msg->data_len < curr_len || msg->data_len <
-		    (curr_len += iph->ihl * 4 - sizeof(struct iphdr))) {
-			printf("====>Packet only contains partial IP "
-			       "header<====\n");
-			goto letscontinue;
-		}
 
-		printf(":::::::::::IP:HEADER:::::::::::\n");
-		printf("IP SRC ADDR=");
-		for (i = 0; i < 4; i++)
-			printf("%d%s", ((unsigned char *)&iph->saddr)[i],
-			   (i == 3) ? "" : ".");
-		printf("\nIP DEST ADDR=");
-		for (i = 0; i < 4; i++)
-			printf("%d%s", ((unsigned char *)&iph->daddr)[i],
-			   (i == 3) ? "" : ".");
-		printf("\nIP PROTOCOL=");
-		if (!(prototype = getprotobynumber(iph->protocol)))
-			printf("%d\n", iph->protocol);
-		else
-			printf("%s\n", prototype->p_name);
+curr_len += sizeof(struct iphdr);
+18printf(":::::::::::IP:HEADER:::::::::::\n");
+printf("IP SRC ADDR=");
+for (i = 0; i < 4; i++)
 
-		if (iph->protocol != IPPROTO_ICMP)
-			goto letscontinue;
+printf("%d%s", ((unsigned char *)&iph->saddr)[i],
+		(i == 3) ? "" : ".");
 
-		icmph = (struct icmphdr *)(((char *)ehdr) + curr_len);
-		curr_len += 4;
-		if (msg->data_len < curr_len) {
-truncated_icmp:
-			printf("====>Packet only contains partial ICMP "
-			       "header<====\n");
-			goto letscontinue;
-		}
-		if (icmph->type != ICMP_ECHO && icmph->type != ICMP_ECHOREPLY)
-			goto letscontinue;
+printf("\nIP DEST ADDR=");
 
-		curr_len += 4;
-		if (msg->data_len < curr_len)
-			goto truncated_icmp;
-		/* Normally the process id, it's sent out in machine
-		 * byte order */
+for (i = 0; i < 4; i++)
 
-		printf("ICMP_ECHO IDENTIFIER=%u\n", icmph->un.echo.id);
-		printf("ICMP_ECHO SEQ NR=%u\n", ntohs(icmph->un.echo.sequence));
+printf("%d%s", ((unsigned char *)&iph->daddr)[i],
+		(i == 3) ? "" : ".");
 
-letscontinue:
-		printf("===>Total Packet length: %ld, of which we examined "
-		       "%d bytes\n", msg->data_len, curr_len);
-		printf("###############################\n"
-		       "######END#OF##PACKET#DUMP######\n"
-		       "###############################\n");
+//printf("\nIP PROTOCOL=");
+
+if (!(prototype = getprotobynumber(iph->protocol)))
+
+	//	printf("%d\n", iph->protocol);
+	else
+	//	printf("%s\n", prototype->p_name);
+
+
+
+
+	curr_len += 4;
+
+	curr_len += 4;
+
+	//printf("ICMP_ECHO IDENTIFIER=%u\n", icmph->un.echo.id);
+	//printf("ICMP_ECHO SEQ NR=%u\n", ntohs(icmph->un.echo.sequence));
+
+
+#endif
 	}
 
-	return 0;
+return 0;
 }
