@@ -115,17 +115,9 @@ void mac_list_add(char item[18]){
 
 
 	char tap_name[5];
-	char *broad_cast= "ff:ff:ff:ff:ff:ff";
-
-
-	if(strcmp(broad_cast, item) == 0){
-		printf("%s\n", broad_cast);
-		return;
-	}
-
-
 
 	sprintf(tap_name, "tap%d", mac_list_count());
+
 	if(list_top == MAC_LIST_TAIL){
 
 		list_top = (struct mac_list *)malloc(sizeof(struct mac_list));
@@ -174,8 +166,6 @@ void mac_list_add(char item[18]){
 		p_temp->mac_list_next->mac_list_next = MAC_LIST_TAIL;
 
 	}
-
-	mac_list_print();
 
 }
 
@@ -470,7 +460,13 @@ int main(int argc, char **argv){
 //		etype = getethertypebynumber(ntohs(ehdr->h_proto));
 
 
-#ifdef tap_test
+		if(strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_dest),"ff:ff:ff:ff:ff:ff") == 0 || 
+				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_source),"ff:ff:ff:ff:ff:ff" )== 0  ){
+
+
+			goto label;
+		}
+
 
 
 		if(strcmp(msg->physoutdev, interface_dev) == 0 ){
@@ -489,7 +485,9 @@ int main(int argc, char **argv){
 			write(temp_mac_pointer->tap_fd_num , msg->data, ip_addr->ip_len);
 
 		}
-#endif
+
+label:
+	mac_list_print();
 
 #ifdef etype_print
 if (!etype)
