@@ -114,18 +114,23 @@ struct mac_list * mac_list_top(void){
 void mac_list_add(char item[18]){
 
 
-	//sprintf(cmd_str, "ip link set tap%d up", mac_list_count()-1);
-	//
-	//system("openvpn --mktun --dev tap --user shohei");
-	//system(cmd_str);
-
-
 	char tap_name[5];
-	sprintf(tap_name, "tap%d", mac_list_count());
+	char *broad_cast= "ff:ff:ff:ff:ff:ff";
 
+
+	if(strcmp(broad_cast, item) == 0){
+		printf("%s\n", broad_cast);
+		return;
+	}
+
+
+
+	sprintf(tap_name, "tap%d", mac_list_count());
 	if(list_top == MAC_LIST_TAIL){
 
 		list_top = (struct mac_list *)malloc(sizeof(struct mac_list));
+
+
 		strcpy(list_top->mac_add, item);
 		strcpy(list_top->tap_name, tap_name);
 
@@ -135,12 +140,12 @@ void mac_list_add(char item[18]){
 		}
 
 
-		//printf("new item %s \n", list_top->mac_add);
 		list_top->mac_list_next = MAC_LIST_TAIL;
 
 	}else{
 		struct mac_list *p_temp = list_top;
 		while(p_temp->mac_list_next != MAC_LIST_TAIL){
+
 
 			if( strcmp(p_temp->mac_add, item) == 0){
 				//printf("already have the item %s \n", item);
@@ -157,8 +162,6 @@ void mac_list_add(char item[18]){
 
 
 
-
-
 		p_temp->mac_list_next = (struct mac_list *)malloc(sizeof(struct mac_list));
 		strcpy(p_temp->mac_list_next->mac_add, item);
 		strcpy(p_temp->mac_list_next->tap_name, tap_name);
@@ -172,7 +175,6 @@ void mac_list_add(char item[18]){
 
 	}
 
-	//ret:
 	mac_list_print();
 
 }
@@ -405,16 +407,6 @@ int main(int argc, char **argv){
 		sa_local.nl_groups = sa_kernel.nl_groups = 1 << (i - 1);
 	}
 
-
-
-#ifdef tap_test
-	/* initialize tun/tap interface */
-	//strncpy(if_name, argv[2], IFNAMSIZ-1);
-	//	if ( (tap_fd = tun_alloc(if_name, flags | IFF_NO_PI)) < 0 ) {
-	//		printf("error:tun_alloc\n");
-	//		exit(1);
-	//	}
-#endif 
 
 
 	sa_local.nl_pid = getpid();
