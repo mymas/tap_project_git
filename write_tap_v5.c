@@ -66,6 +66,7 @@ int mac_list_count(void);
 int tun_alloc(char *dev, int flags);
 struct mac_list * mac_list_check(char item[18]);
 void mac_list_print(void);
+void delete_tap();
 
 
 struct mac_list{
@@ -85,6 +86,8 @@ void mac_list_init(){
 		list_top = list_top->mac_list_next;
 		free(delete_pos);
 	}
+
+	delete_tap();
 
 }
 
@@ -116,10 +119,16 @@ void mac_list_add(char item[18]){
 
 	char tap_name[5];
 
-	sprintf(tap_name, "tap%d", mac_list_count());
+
+
 
 	if(list_top == MAC_LIST_TAIL){
 
+		system("openvpn --mktun --dev tap --user shohei");
+		sprintf(cmd_str, "ip link set tap%d up", mac_list_count());
+		system(cmd_str);
+
+		sprintf(tap_name, "tap%d", mac_list_count());
 		list_top = (struct mac_list *)malloc(sizeof(struct mac_list));
 
 
@@ -153,6 +162,11 @@ void mac_list_add(char item[18]){
 		}
 
 
+		system("openvpn --mktun --dev tap --user shohei");
+		sprintf(cmd_str, "ip link set tap%d up", mac_list_count());
+		system(cmd_str);
+
+		sprintf(tap_name, "tap%d", mac_list_count());
 
 		p_temp->mac_list_next = (struct mac_list *)malloc(sizeof(struct mac_list));
 		strcpy(p_temp->mac_list_next->mac_add, item);
@@ -227,6 +241,26 @@ struct mac_list * mac_list_check(char item[18]){
 	}
 
 }
+
+void delete_tap(){
+
+//int list_length = mac_list_count();
+
+	//char tap_name[5];
+	int tap_num =0;
+	//system("openvpn --mktun --dev tap --user shohei");
+
+	while(tap_num <= 50){
+		sprintf(cmd_str, "ip link set tap%d down",tap_num);
+		tap_num++;
+	}
+
+	
+	//sprintf(tap_name, "tap%d", mac_list_count());
+	return;
+
+}
+
 
 int tun_alloc(char *dev, int flags){
 
@@ -377,7 +411,7 @@ int main(int argc, char **argv){
 	//int flags = IFF_TAP;
 	//char if_name[IFNAMSIZ] = "tap0";
 	const struct ip *ip_addr;	
-	char interface_dev[] ="vif2.0-emu";
+	char interface_dev[] ="vif1.0-emu";
 	struct mac_list *temp_mac_pointer =NULL;
 
 	//	struct mac_list p;
