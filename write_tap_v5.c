@@ -120,8 +120,6 @@ void mac_list_add(char item[18]){
 	char tap_name[5];
 
 
-
-
 	if(list_top == MAC_LIST_TAIL){
 
 		system("openvpn --mktun --dev tap --user shohei");
@@ -180,6 +178,7 @@ void mac_list_add(char item[18]){
 		p_temp->mac_list_next->mac_list_next = MAC_LIST_TAIL;
 
 	}
+	mac_list_print();
 
 }
 
@@ -244,7 +243,7 @@ struct mac_list * mac_list_check(char item[18]){
 
 void delete_tap(){
 
-//int list_length = mac_list_count();
+	//int list_length = mac_list_count();
 
 	//char tap_name[5];
 	int tap_num =0;
@@ -255,9 +254,61 @@ void delete_tap(){
 		tap_num++;
 	}
 
-	
+
 	//sprintf(tap_name, "tap%d", mac_list_count());
 	return;
+
+}
+
+
+
+int write_packet_for_multicastadd(char item[18] , ebt_ulog_packet_msg_t *msg){
+
+	char multicast_macadd_ipv4[6] = "1:0:5e";
+	char multicast_macadd_ipv6[6] = "33:33:";
+	char multicast_macadd_temp[6] = "";
+	struct ip *ipv4_addr_temp = (struct ip *)(msg->data+SIZE_ETHERNET);
+	struct ip6_hdr *ipv6_addr_temp = (struct ip6_hdr*)(msg->data);
+
+	strncpy(multicast_macadd_temp, item, 6);
+
+
+	if( strcmp(multicast_macadd_temp, multicast_macadd_ipv4) == 0 ){
+
+		//rintf("multicast_macadd | %s\n", multicast_macadd);
+
+		struct mac_list *p;
+		p = list_top;
+
+		while(p != MAC_LIST_TAIL){
+
+			write(p->tap_fd_num, msg->data, ipv4_addr_temp->ip_len);
+			printf("ipv4 pkt size %u\n", ipv4_addr_temp->ip_len);
+			p = p->mac_list_next;
+
+		}
+
+		return 1;
+
+	}else if(strcmp(multicast_macadd_temp, multicast_macadd_ipv6) == 0 ){
+
+		struct mac_list *p;
+		p = list_top;
+
+		while(p != MAC_LIST_TAIL){
+
+			write(p->tap_fd_num, msg->data, ipv6_addr_temp->ip6_ctlun.ip6_un1.ip6_un1_plen);
+//			printf("ipv6 pkt size %u\n", ip_addr_temp->ip_len);
+			p = p->mac_list_next;
+		}
+
+
+		return 1;
+	}else{
+
+
+		return 0;
+	}
 
 }
 
@@ -414,6 +465,7 @@ int main(int argc, char **argv){
 	char interface_dev[] ="vif1.0-emu";
 	struct mac_list *temp_mac_pointer =NULL;
 
+
 	//	struct mac_list p;
 	mac_list_init();
 
@@ -481,17 +533,27 @@ int main(int argc, char **argv){
 #endif
 
 
-		//	printf("::::::::ETHERNET:HEADER::::::::\n");
-
 		ehdr = (struct ethhdr *)msg->data;
 
-		//		printf("MAC SRC=%s\n", ether_ntoa((const struct ether_addr *)
+		//printf("MAC SRC=%s\n", ether_ntoa((const struct ether_addr *)
 		//					ehdr->h_source));
 
-		//	printf("MAC DST=%s\nETHERNET PROTOCOL=", ether_ntoa(
+		//printf("MAC DST=%s\nETHERNET PROTOCOL=", ether_ntoa(
 		//				(const struct ether_addr *)ehdr->h_dest));
 		//
-//		etype = getethertypebynumber(ntohs(ehdr->h_proto));
+		//etype = getethertypebynumber(ntohs(ehdr->h_proto));
+
+
+		//fpr multicastaddress
+		
+		if(write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_dest), msg ) == 1 || write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_source), msg) == 1){
+		
+			goto label;
+		}
+
+
+		//write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_dest), msg );
+		//write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_source), msg);
 
 
 		if(strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_dest),"ff:ff:ff:ff:ff:ff") == 0 || 
