@@ -8,7 +8,6 @@
 #include <linux/if_arp.h>
 
 
-
 struct net_device_stats {
 	unsigned long   rx_packets;
 	unsigned long   tx_packets;
@@ -38,6 +37,7 @@ struct net_device_stats {
 
 
 int main(){
+
 	int soc;
 	struct sockaddr_nl sa;
 	
@@ -84,7 +84,6 @@ int main(){
 		return 1;
 	}
 
-	//printf("recv\n");
 
 	/* 受信したNetlinkメッセージを解析する */
 	for (nlhdr = (struct nlmsghdr *)buf; NLMSG_OK(nlhdr, n);
@@ -111,22 +110,18 @@ int main(){
 			continue;
 		}
 
-		/* 各種パラメータを表示 */
-	//	printf(" family : %d\n", ifimsg->ifi_family);
-	//	printf(" type : %d\n", ifimsg->ifi_type);
 		printf(" index : %d\n", ifimsg->ifi_index);
-	//	printf(" flags : %d\n", ifimsg->ifi_flags);
-	//	printf(" change : %d\n", ifimsg->ifi_change);
-
+		
 		/* ifinfomsgの次に付加されているrtattrメッセージを解析 */
 		rtalist_len = nlhdr->nlmsg_len - NLMSG_LENGTH(sizeof(struct ifinfomsg));
 		for (rta = IFLA_RTA(ifimsg); RTA_OK(rta, rtalist_len);
 				rta = RTA_NEXT(rta, rtalist_len)) {
 
-//			printf(" type : %d\n", rta->rta_type);
 
 			switch (rta->rta_type) {
 				case IFLA_IFNAME:
+
+					//device name
 					printf(" + %s\n", (char *)RTA_DATA(rta));
 					break;
 

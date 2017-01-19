@@ -3,11 +3,11 @@
 #define SIZE_ETHERNET 14
 
 //#define print_check
-#define mac_check
+//#define mac_check
 
 char destination[20] = "192.168.100.10"; 
 int numrcv;
-//int tap_fd, option;
+int tap_fd, option;
 int option;
 int flags = IFF_TAP;
 char if_name[IFNAMSIZ] = "";
@@ -21,6 +21,7 @@ struct mac_list *list_top;
 //prptotype
 int tun_alloc(char *dev, int flags);
 
+# ifdef mac_check
 struct mac_list{
 
 	char mac_add[18];
@@ -80,6 +81,8 @@ int mac_list_count(void){
 	return cnt;
 
 }
+
+#endif
 
 #ifdef mac_check
 //add
@@ -144,7 +147,7 @@ void mac_list_add(char item[18], int flag){
 		}
 	}
 }
-#else
+//#else
 
 void mac_list_add(char item[18]){
 
@@ -194,13 +197,15 @@ void mac_list_add(char item[18]){
 }
 #endif
 
+#ifdef mac_check
 //check
 struct mac_list *mac_list_check(char item[18], int flag){
 
 
 	if(list_top == MAC_LIST_TAIL){
 
-#ifdef mac_check
+//#ifdef mac_check
+
 		if(flag == 0){
 
 		mac_list_add(item, 0);
@@ -211,12 +216,13 @@ struct mac_list *mac_list_check(char item[18], int flag){
 		return list_top;
 		}
 
-#else
+//#else
 
 		mac_list_add(item);
 		return list_top;
 
-#endif
+//#endif
+
 	}else{
 		struct mac_list *p;
 		p = list_top;
@@ -229,7 +235,7 @@ struct mac_list *mac_list_check(char item[18], int flag){
 			p = mac_list_next(p);
 		}
 
-#ifdef mac_check
+//#ifdef mac_check
 		if(flag == 0){
 
 		mac_list_add(item, 0);
@@ -239,16 +245,20 @@ struct mac_list *mac_list_check(char item[18], int flag){
 		mac_list_add(item, 1);
 		return p;
 		}
-#else
+//#else
 		mac_list_add(item);
 		return p;
 
-#endif
+//#endif
 
 	}
 
 }
 
+#endif
+
+
+#ifdef mac_check
 char * convmac_tostr(u_char *hwaddr,char *mac,size_t size){
 	snprintf(mac,size,"%02x:%02x:%02x:%02x:%02x:%02x",
 			hwaddr[0],hwaddr[1],hwaddr[2],
@@ -282,11 +292,11 @@ void start_pktfunc( u_char *user,                  // pcap_loop関数の第4引�
 	}
 
 
-	p = mac_list_check(convmac_tostr(eth_hdr->ether_dhost,dmac,sizeof(dmac)),0);
-//	write(p->tap_fd, packet, ip_addr->ip_len);
+//	p = mac_list_check(convmac_tostr(eth_hdr->ether_dhost,dmac,sizeof(dmac)),0);
+	write(tap_fd, packet, ip_addr->ip_len);
 
-	p = mac_list_check(convmac_tostr(eth_hdr->ether_shost,smac,sizeof(smac)), 1);
-//	write(p->tap_fd, packet, ip_addr->ip_len);
+	//	p = mac_list_check(convmac_tostr(eth_hdr->ether_shost,smac,sizeof(smac)), 1);
+	write(tap_fd, packet, ip_addr->ip_len);
 
 	//if( strcmp(convmac_tostr(eth_hdr->ether_dhost,dmac,sizeof(dmac)),filter_mac)==0 || strcmp(convmac_tostr(eth_hdr->ether_shost,smac,sizeof(smac)),filter_mac)==0){
 	//printf("dest mac %s\n",convmac_tostr(eth_hdr->ether_dhost,dmac,sizeof(dmac)));
@@ -298,6 +308,9 @@ void start_pktfunc( u_char *user,                  // pcap_loop関数の第4引�
 
 
 }
+
+#endif
+
 
 int tun_alloc(char *dev, int flags){
 
@@ -347,24 +360,23 @@ int main(int argc, char *argv[]){
 	pcap_t *pd = NULL;
 	char ebuf[PCAP_ERRBUF_SIZE];
 
+#ifdef mac_check
 	struct mac_list p;
 	mac_list_init();
 
-//	if(argc < 2){
-//		printf("tap name\n");
-//		exit(1);
-//	}
+#endif 
 
-//	strncpy(if_name, argv[1], IFNAMSIZ-1);
+	strncpy(if_name, argv[1], IFNAMSIZ-1);
 
 
 	/* initialize tun/tap interface */
-//	if ( (tap_fd = tun_alloc(if_name, flags | IFF_NO_PI)) < 0 ) {
-//		printf("error:tun_alloc\n");
-//		exit(1);
-//	}
+	if ( (tap_fd = tun_alloc(if_name, flags | IFF_NO_PI)) < 0 ) {
+		printf("error:tun_alloc\n");
+		exit(1);
+	}
 
 
+#ifdef mac_check
 	if( (pd = pcap_open_live( "br0" ,             // インターフェイス名
 					DPCP_RCV_MAXSIZE ,  // 最大受信サイズ(最初の68byteまで受信する)
 					DPCP_PROMSCS_MODE , // 自分宛以外のパケットも処理の対象にする
@@ -382,10 +394,8 @@ int main(int argc, char *argv[]){
 		// error
 		exit(-1);
 	}
+#endif
 
-	//	pcap_close(pd);
-	//printf("writing data:sleep 60 seconds\n");
-	//sleep(30);
-	//
+
 	return 0;
 }
