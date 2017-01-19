@@ -50,6 +50,20 @@ default is log-leve= info , log-prefix="",no ip log, no arp log.
 
 * --ulog-nlgroup group
 
+error
+------------------
+ebtables -A FORWARD --ulog-nlgroup 1
+Unable to update the kernel. Two possible causes:
+1. Multiple ebtables programs were executing simultaneously. The ebtables
+   userspace tool doesn't by default support multiple ebtables programs running
+   concurrently. The ebtables option --concurrent or a tool like flock can be
+   used to support concurrent scripts that update the ebtables kernel tables.
+2. The kernel doesn't support a certain ebtables extension, consider
+   recompiling your kernel or insmod the extension.
+
+------------------
+
+
 [refarence document1](https://linuxjm.osdn.jp/html/LDP_man-pages/man7/netlink.7.html)
 
 [refarence document2](http://ebtables.netfilter.org/examples/basic.html#ex_ulog)
@@ -60,4 +74,18 @@ default is log-leve= info , log-prefix="",no ip log, no arp log.
 
 [refarence document for netlink](http://man7.org/linux/man-pages/man7/netlink.7.html)
 
+# usage
 
+* 実行する際には以下のコマンドを実行する必要がある
+
+```bash
+ebtables -A FORWARD --ulog-nlgroup 1 --ulog-cprange 131072
+```
+
+* 次に以下のソースを実行
+
+```bash
+./write_tap_v5_hyper 1
+```
+
+* コマンドの第二引数はnlgroupの番号

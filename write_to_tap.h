@@ -44,6 +44,9 @@
 #include "ethernetdb.h"
 #include <linux/netfilter_bridge/ebt_ulog.h>
 
+//hypercall library
+#include <xenctrl.h>
+
 #define DPCP_RCV_MAXSIZE   68
 #define DPCP_PROMSCS_MODE  1
 #define DPCP_RCV_TIMEOUT   1000
@@ -52,6 +55,8 @@
 #define P_MAX_SIZE 12000
 #define P_MAX_NUM  200
 
+#define MAX_PKT 200
+#define MAX_SIZE 12000
 
 //mac_list
 #define MAC_LIST_TAIL NULL

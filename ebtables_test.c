@@ -120,6 +120,8 @@ int main(){
 
 			switch (rta->rta_type) {
 				case IFLA_IFNAME:
+
+					//device name
 					printf(" + %s\n", (char *)RTA_DATA(rta));
 					break;
 

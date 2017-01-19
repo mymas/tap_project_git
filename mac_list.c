@@ -6,17 +6,14 @@
 #define MAC_LIST_TAIL NULL
 //#define check_mac_list
 
-
+struct mac_list *list_top;
+struct mac_list p;
 
 struct mac_list{
 
 	char mac_add[18];
 	struct mac_list *mac_list_next;
-
 };
-
-struct mac_list *list_top;
-
 
 //init
 void mac_list_init(){
@@ -30,7 +27,6 @@ void mac_list_init(){
 }
 
 //next
-
 struct mac_list * mac_list_next(struct mac_list * pos){
 
 	if(pos != NULL){
@@ -77,7 +73,6 @@ void mac_list_add(char item[18]){
 
 }
 
-//(item)
 
 int mac_list_count(void){
 
@@ -94,6 +89,35 @@ int mac_list_count(void){
 
 }
 
+
+struct mac_list * mac_list_check(char item[18]){
+
+
+	if(list_top == MAC_LIST_TAIL){
+
+		mac_list_add(item);
+		return list_top;
+
+	}else{
+		struct mac_list *p;
+		p = list_top;
+		while(p!= MAC_LIST_TAIL){
+
+			if(strcmp(p->mac_add, item) == 0){
+
+				return p;
+			}
+			p = mac_list_next(p);
+		}
+
+		mac_list_add(item);
+		printf("mac add | %s\n", item);
+		return p;
+
+
+	}
+
+}
 
 #ifdef check_mac_list
 int main(int argc, const char * argv[]){
