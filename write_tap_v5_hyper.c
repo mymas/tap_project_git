@@ -114,6 +114,7 @@ struct mac_list * mac_list_top(void){
 }
 
 //add
+#if 0
 void mac_list_add(char item[18]){
 
 
@@ -121,19 +122,17 @@ void mac_list_add(char item[18]){
 
 
 	if(list_top == MAC_LIST_TAIL){
-
 		system("openvpn --mktun --dev tap --user shohei");
-		sprintf(cmd_str, "ip link set tap%d up", mac_list_count());
+		sprintf(cmd_str, "ip link set tap%d up", 0);
 		system(cmd_str);
 
 		sprintf(tap_name, "tap%d", mac_list_count());
-		list_top = (struct mac_list *)malloc(sizeof(struct mac_list));
+		//list_top = (struct mac_list *)malloc(sizeof(struct mac_list));
 
+//		strcpy(list_top->mac_add, item);
+//		strcpy(list_top->tap_name, tap_name);
 
-		strcpy(list_top->mac_add, item);
-		strcpy(list_top->tap_name, tap_name);
-
-		if ( (list_top->tap_fd_num = tun_alloc(tap_name, flags | IFF_NO_PI)) < 0 ) {
+		if ( (tap_fd_num = tun_alloc(tap_name, flags | IFF_NO_PI)) < 0 ) {
 			printf("error:tun_alloc\n");
 			exit(1);
 		}
@@ -181,6 +180,7 @@ void mac_list_add(char item[18]){
 	mac_list_print();
 
 }
+#endif
 
 
 int mac_list_count(void){
@@ -255,14 +255,14 @@ void delete_tap(){
 }
 
 
-
-int write_packet_for_multicastadd(char item[18] , ebt_ulog_packet_msg_t *msg){
+#if 0
+int write_packet_for_multicastadd(char item[18] , unsigned char *msg){
 
 	char multicast_macadd_ipv4[6] = "1:0:5e";
 	char multicast_macadd_ipv6[6] = "33:33:";
 	char multicast_macadd_temp[6] = "";
-	struct ip *ipv4_addr_temp = (struct ip *)(msg->data+SIZE_ETHERNET);
-	struct ip6_hdr *ipv6_addr_temp = (struct ip6_hdr*)(msg->data);
+//	struct ip *ipv4_addr_temp = (struct ip *)(msg->data+SIZE_ETHERNET);
+//	struct ip6_hdr *ipv6_addr_temp = (struct ip6_hdr*)(msg->data);
 
 	strncpy(multicast_macadd_temp, item, 6);
 
@@ -302,11 +302,12 @@ int write_packet_for_multicastadd(char item[18] , ebt_ulog_packet_msg_t *msg){
 
 }
 
+#endif
 
 
 
-int write_packet_for_broadcastadd(ebt_ulog_packet_msg_t *msg){
-
+#if 0
+int write_packet_for_broadcastadd(unsigned char *msg){
 	char broadcast_macadd_ipv4[2] = "ff";
 	char buf_src[2];
 	char buf_dst[2];
@@ -328,16 +329,12 @@ int write_packet_for_broadcastadd(ebt_ulog_packet_msg_t *msg){
 
 #ifdef broadcast_test
 	if( strcmp(broadcast_macadd_ipv4, temp_src) == 0 || strcmp(broadcast_macadd_ipv4, temp_dst) == 0  ){
-
-
 		struct mac_list *p;
 		p = list_top;
 
 		while(p != MAC_LIST_TAIL){
-
 			write(p->tap_fd_num, msg->data, ipv4_addr_temp->ip_len);
 			p = p->mac_list_next;
-
 		}
 
 		return 1;
@@ -350,12 +347,12 @@ int write_packet_for_broadcastadd(ebt_ulog_packet_msg_t *msg){
 }
 
 
-int write_packet_for_broadcast_macadd(ebt_ulog_packet_msg_t *msg){
+
+int write_packet_for_broadcast_macadd(unsigned char *msg){
 
 	//	struct ip6_hdr *ipv6_addr_temp = (struct ip6_hdr*)(msg->data);
 
 	struct ip *ipv4_addr_temp = (struct ip *)(msg->data+SIZE_ETHERNET);
-
 	struct mac_list *p;
 	p = list_top;
 
@@ -369,6 +366,7 @@ int write_packet_for_broadcast_macadd(ebt_ulog_packet_msg_t *msg){
 	return 1;
 }
 
+#endif
 
 
 
@@ -506,7 +504,7 @@ int main(int argc, char **argv){
 #endif
 
 	int rcvbufsize = BUFLEN;
-	ebt_ulog_packet_msg_t *msg;
+	ebt_ulog_packet_msg_t *phy_dev_msg;
 	struct ethhdr *ehdr;
 	//struct ethertypeent *etype;
 
@@ -521,10 +519,22 @@ int main(int argc, char **argv){
 	//int flags = IFF_TAP;
 	//char if_name[IFNAMSIZ] = "tap0";
 	const struct ip *ip_addr;	
-	char interface_dev[] ="vif1.0-emu";
+	char interface_dev[] ="vif4.0-emu";
+	char physoutdev[10],physindev[10];
+	unsigned long vm_tag = 0xaaaa1234;
 	struct mac_list *temp_mac_pointer =NULL;
 	int on = 0;
-	//	struct mac_list p;
+
+	unsigned char *data,*msg;
+	unsigned int sizes[MAX_PKT];
+	int n,j;
+	xc_interface *xch;
+	
+	char tap_name[5];
+	int tap_fd_num;
+
+	data = malloc(MAX_SIZE);
+	//struct mac_list p;
 	mac_list_init();
 
 #endif
@@ -562,84 +572,98 @@ int main(int argc, char **argv){
 	// ignore error message
 	//i = setsockopt(sfd, SOL_SOCKET, NETLINK_NO_ENOBUFS, &on, sizeof(on));
 
-	while (1) {
-		if (!(msg = ulog_get_packet()))
-			continue;
+		system("openvpn --mktun --dev tap --user shohei");
+		sprintf(cmd_str, "ip link set tap%d up", 0);
+		system(cmd_str);
+		sprintf(tap_name, "tap%d", 0);
 
-		if (msg->version != EBT_ULOG_VERSION) {
-			printf("WRONG VERSION: %d INSTEAD OF %d\n",
-					msg->version, EBT_ULOG_VERSION);
-			continue;
+		if ( (tap_fd_num = tun_alloc(tap_name, flags | IFF_NO_PI)) < 0 ) {
+			printf("error:tun_alloc\n");
+			exit(1);
 		}
-#ifdef PRINTF
-		printf("PACKET NR: %d\n", ++pktcnt);
-#endif
+
+		xch = xc_interface_open(NULL, NULL, 0);
+	while (1) {
+
+		//number of packets
+		n = xc_get_packets(xch, vm_tag, data, sizes);
+
+		//xc_interface_close(xch);
+
+		if (n < 0) {
+			perror("init_nest");
+			exit(1);
+		}else{
+			msg = data;
+		}
+
+
+		for(i = 0; i < n; i++) {
+			//msg から sizes[i] バイトのパケットを処理
+			//ethhdr = (struct ethhdr *)msg;
+			//ehdr = (struct ethhdr *)msg;
+			printf("write:%lu\n",write(tap_fd_num , msg, sizes[i]));
+
+			for( j=0;j <= 14;j++){
+				printf("%02x ",msg[j]);
+			}
+
+				printf("\n");
+//			printf("write:%02x %02x %02x\n",msg[0],msg[1],msg[2]);
+
+			//write(tap_fd_num , msg, sizes[i]);
+
+			// 次のパケットデータ
+			msg += sizes[i];
+		}
+
+		
 		//iph = NULL;
 		//curr_len = ETH_HLEN;
-
-#ifdef PRINTF
-		printf("INDEV=%s\nOUTDEV=%s\nPHYSINDEV=%s\nPHYSOUTDEV=%s\n"
-				"PREFIX='%s'", msg->indev, msg->outdev, msg->physindev,
-				msg->physoutdev, msg->prefix);
-#endif
-
-		ptm = localtime(&msg->stamp.tv_sec);
-		strftime (time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", ptm);
-
-#ifdef PRINTF
-		printf("\nARRIVAL TIME: %s\nMARK=%lu\nHOOK=%s\n", time_str, msg->mark, hookstr[msg->hook]);
-#endif 
-
-
-
-		ehdr = (struct ethhdr *)msg->data;
 
 		//etype = getethertypebynumber(ntohs(ehdr->h_proto));
 
 		
 #ifdef DISTRIBUTE_PACKET
 		//fpr multicastaddress
-		if(write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_dest), msg ) == 1 || write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_source), msg) == 1){
-		
-			goto label;
-		}
+//		if(write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_dest), msg ) == 1 || write_packet_for_multicastadd(ether_ntoa((const struct ether_addr *)ehdr->h_source), msg) == 1){
+//		
+//			goto label;
+//		}
+//
+//
+//		if(strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_dest),"ff:ff:ff:ff:ff:ff") == 0 || 
+//				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_source),"ff:ff:ff:ff:ff:ff" )== 0  ){
+//
+//			write_packet_for_broadcast_macadd(msg);
+//
+//			goto label;
+//		}
+//
+//
+//		if(write_packet_for_broadcastadd(msg) == 1){
+//		
+//			goto label;
+//		
+//		}
 
+//			mac_list_add(ether_ntoa((const struct ether_addr *)ehdr->h_dest));
+//			temp_mac_pointer =  mac_list_check(ether_ntoa((const struct ether_addr *)ehdr->h_dest));
+//
+//			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
+//			write(temp_mac_pointer->tap_fd_num , msg, ip_addr->ip_len);
 
-		if(strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_dest),"ff:ff:ff:ff:ff:ff") == 0 || 
-				strcmp(ether_ntoa((const struct ether_addr *)ehdr->h_source),"ff:ff:ff:ff:ff:ff" )== 0  ){
+//		if(strcmp(physindev, interface_dev) == 0 ){
+//			mac_list_add(ether_ntoa((const struct ether_addr *)ehdr->h_source));
+//			temp_mac_pointer =  mac_list_check(ether_ntoa((const struct ether_addr *)ehdr->h_source));
+//
+//			ip_addr = (struct ip *)(msg+SIZE_ETHERNET);
+//			write(temp_mac_pointer->tap_fd_num , msg, ip_addr->ip_len);
 
-			write_packet_for_broadcast_macadd(msg);
+		//}
 
-			goto label;
-		}
-
-
-		if(write_packet_for_broadcastadd(msg) == 1){
-		
-			goto label;
-		
-		}
-
-		if(strcmp(msg->physoutdev, interface_dev) == 0 ){
-
-			mac_list_add(ether_ntoa((const struct ether_addr *)ehdr->h_dest));
-			temp_mac_pointer =  mac_list_check(ether_ntoa((const struct ether_addr *)ehdr->h_dest));
-
-			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
-			write(temp_mac_pointer->tap_fd_num , msg->data, ip_addr->ip_len);
-		}
-
-		if(strcmp(msg->physindev, interface_dev) == 0 ){
-			mac_list_add(ether_ntoa((const struct ether_addr *)ehdr->h_source));
-			temp_mac_pointer =  mac_list_check(ether_ntoa((const struct ether_addr *)ehdr->h_source));
-
-			ip_addr = (struct ip *)(msg->data+SIZE_ETHERNET);
-			write(temp_mac_pointer->tap_fd_num , msg->data, ip_addr->ip_len);
-
-		}
-
-label:
-	mac_list_print();
+//label:
+	//mac_list_print();
 
 #endif /* DISTRIBUTE_PACKET */
 

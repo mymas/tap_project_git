@@ -74,4 +74,18 @@ Unable to update the kernel. Two possible causes:
 
 [refarence document for netlink](http://man7.org/linux/man-pages/man7/netlink.7.html)
 
+# usage
 
+* 実行する際には以下のコマンドを実行する必要がある
+
+```bash
+ebtables -A FORWARD --ulog-nlgroup 1 --ulog-cprange 131072
+```
+
+* 次に以下のソースを実行
+
+```bash
+./write_tap_v5_hyper 1
+```
+
+* コマンドの第二引数はnlgroupの番号

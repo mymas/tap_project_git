@@ -256,6 +256,9 @@ struct mac_list *mac_list_check(char item[18], int flag){
 }
 
 #endif
+
+
+#ifdef mac_check
 char * convmac_tostr(u_char *hwaddr,char *mac,size_t size){
 	snprintf(mac,size,"%02x:%02x:%02x:%02x:%02x:%02x",
 			hwaddr[0],hwaddr[1],hwaddr[2],
@@ -305,6 +308,9 @@ void start_pktfunc( u_char *user,                  // pcap_loop関数の第4引�
 
 
 }
+
+#endif
+
 
 int tun_alloc(char *dev, int flags){
 
@@ -370,6 +376,7 @@ int main(int argc, char *argv[]){
 	}
 
 
+#ifdef mac_check
 	if( (pd = pcap_open_live( "br0" ,             // インターフェイス名
 					DPCP_RCV_MAXSIZE ,  // 最大受信サイズ(最初の68byteまで受信する)
 					DPCP_PROMSCS_MODE , // 自分宛以外のパケットも処理の対象にする
@@ -387,6 +394,8 @@ int main(int argc, char *argv[]){
 		// error
 		exit(-1);
 	}
+#endif
+
 
 	return 0;
 }

@@ -1,0 +1,210 @@
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50393 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.19 GBytes  1.03 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50394 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.08 GBytes   925 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50395 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.06 GBytes   912 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size:  264 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50396 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.09 GBytes   935 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size:  638 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50397 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.08 GBytes   924 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50398 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.09 GBytes   940 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50399 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.09 GBytes   932 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50400 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.13 GBytes   971 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50401 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.32 GBytes  1.13 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50402 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.08 GBytes   924 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50406 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.04 GBytes   891 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50407 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.13 GBytes   971 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50408 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.15 GBytes   989 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50409 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.05 GBytes   904 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50410 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.12 GBytes   964 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50411 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.27 GBytes  1.09 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50412 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.01 GBytes   866 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50413 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.04 GBytes   897 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50414 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.15 GBytes   986 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50415 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.05 GBytes   901 Mbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50428 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  41.3 GBytes  35.5 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 4.00 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50429 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  41.9 GBytes  36.0 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 3.94 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50430 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  37.4 GBytes  32.2 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50431 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  37.8 GBytes  32.5 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size:  969 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50432 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  46.8 GBytes  40.2 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50433 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  40.0 GBytes  34.3 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50434 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  42.1 GBytes  36.1 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50435 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  46.2 GBytes  39.7 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50436 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  47.1 GBytes  40.5 Gbits/sec
+------------------------------------------------------------
+Client connecting to 192.168.100.7, TCP port 5001
+TCP window size: 1.37 MByte (default)
+------------------------------------------------------------
+[  3] local 192.168.100.3 port 50437 connected with 192.168.100.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  35.3 GBytes  30.3 Gbits/sec
